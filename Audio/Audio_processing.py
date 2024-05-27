@@ -7,11 +7,12 @@ from scipy.signal import butter, lfilter
 import os
 
 
+# Set the configuration parameters
 class Config:
     def __init__(self):
         # Band filter parameters
-        self.low_cutoff = 800
-        self.high_cutoff = 8200
+        self.low_cutoff = 1000
+        self.high_cutoff = 8000
 
         # Sampling Parameters
         self.n_fft = 2048
@@ -23,7 +24,7 @@ class Config:
         self.fmin = 20
         self.fmax = 8000
 
-
+# Set the bandpass filter
 def bandpass_filter(y, config, order=5):
     nyquist_freq = 0.5 * config.sr
     low = config.low_cutoff / nyquist_freq
@@ -33,39 +34,26 @@ def bandpass_filter(y, config, order=5):
 
     return y_filtered
 
-
+# Load the audio file
 def load_audio(file_path):
     y, sr = librosa.load(file_path, sr=None)
     return y, sr
 
-
+# Clean the audio file
 def clean_audio(y):
     # Replace NaNs and infinite values with zero
     y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
     return y
 
-
+# Normalize the audio file
 def normalize_audio(y):
     max_val = np.max(np.abs(y))
     if max_val > 0:
         y = y / max_val
     return y
 
-
+# Extract the audio features
 def extract_features(y, config):
-    y = clean_audio(y)
-    y = normalize_audio(y)
-
-    # STFT
-    stft = librosa.stft(
-        y,
-        n_fft=config.n_fft,
-        hop_length=config.hop_length,
-        win_length=config.n_fft,
-        window=config.window_type,
-    )
-    magnitude, phase = librosa.magphase(stft)
-
     # Root Mean Square
     rms = librosa.feature.rms(y=y)
 
@@ -90,6 +78,7 @@ def extract_features(y, config):
     # Mel-Frequency Cepstral Coefficients (MFCC)
     mfcc = librosa.feature.mfcc(y=y, sr=config.sr)
 
+    # Load the features into a DataFrame
     features = pd.DataFrame(
         {
             "rms": rms[0],
@@ -106,9 +95,11 @@ def extract_features(y, config):
     print(pd.DataFrame(features))
     return features
 
-
+# Display the audio
 def display_audio(y, config):
+    # Create a figure and axis
     fig, ax = plt.subplots(2, 1, figsize=(12, 6), sharex=True, tight_layout=True)
+    # Create the mel spectrogram 
     mel_spec = librosa.feature.melspectrogram(
         y=y,
         sr=config.sr,
@@ -118,11 +109,15 @@ def display_audio(y, config):
         fmax=config.fmax,
         fmin=config.fmin,
     )
+    # Convert the power spectrogram to dB 
     db_mel_spec = librosa.power_to_db(mel_spec, ref=1.0)
 
+    # Display the waveform
     librosa.display.waveshow(
-        y=y, sr=config.sr, ax=ax[0], color=plt.get_cmap(config.cmap)(0.1)
+        y=y, sr=config.sr,
+        ax=ax[0], color=plt.get_cmap(config.cmap)(0.1)
     )
+    # Display the mel spectrogram
     librosa.display.specshow(
         db_mel_spec,
         sr=config.sr,
@@ -139,22 +134,29 @@ def display_audio(y, config):
     plt.show()
 
 
+# Save the features to a CSV file
 def save_features(channel_name, save_path, features):
     df = pd.DataFrame(features)
     csv_path = os.path.join(save_path, f"{channel_name}.csv")
     # Save the DataFrame to CSV
     df.to_csv(csv_path, index=False)
 
-
+# Extract the audio features from the given file
 def extract_audio_features(file_path, save_path):
+    # Load the config 
     config = Config()
+    # Load the audio file
     y, sr = load_audio(file_path=file_path)
+    # Apply the bandpass filter
     y = bandpass_filter(y, config=config)
+    # Clean and normalize the audio
     y = clean_audio(y)
     y = normalize_audio(y)
+    # Extract the features
     features = extract_features(y, config)
 
     # display_audio(y, config)
+    # Save the features
     save_features(
         channel_name=os.path.splitext(os.path.basename(file_path))[0],
         save_path=save_path,
