@@ -39,6 +39,11 @@ def load_audio(file_path):
     y, sr = librosa.load(file_path, sr=None)
     return y, sr
 
+def resample_audio(y, sr, config):
+    y_resampled = librosa.resample(y=y, orig_sr=sr, target_sr=config.sr)
+    return y_resampled
+
+
 # Clean the audio file
 def clean_audio(y):
     # Replace NaNs and infinite values with zero
@@ -75,12 +80,15 @@ def extract_features(y, config):
     # Zero-Crossing Rate (ZCR)
     zcr = librosa.feature.zero_crossing_rate(y, hop_length=config.hop_length)
 
+    timestamps = librosa.frames_to_time(np.arange(rms.shape[1]), sr=config.sr, hop_length=config.hop_length)
+
     # Mel-Frequency Cepstral Coefficients (MFCC)
     mfcc = librosa.feature.mfcc(y=y, sr=config.sr)
 
     # Load the features into a DataFrame
     features = pd.DataFrame(
         {
+            "timestamp": timestamps,
             "rms": rms[0],
             "spectral_centroid": spectral_centroid[0],
             "spectral_bandwidth": spectral_bandwidth[0],
@@ -142,11 +150,12 @@ def save_features(channel_name, save_path, features):
     df.to_csv(csv_path, index=False)
 
 # Extract the audio features from the given file
-def extract_audio_features(file_path, save_path):
+def extract_audio_features(file_path, save_path, config):
     # Load the config 
     config = Config()
     # Load the audio file
     y, sr = load_audio(file_path=file_path)
+    y = resample_audio(y, sr, config)
     # Apply the bandpass filter
     y = bandpass_filter(y, config=config)
     # Clean and normalize the audio

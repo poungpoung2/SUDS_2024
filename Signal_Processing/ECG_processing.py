@@ -20,9 +20,9 @@ def bandpass_filter(signal, lowcut, highcut, fs, order=4):
     return y
 
 # Remove the noise of the signal by smoothing it
-def smoothing_singal(signal_data, fs):
+def smoothing_singal(signal_data, fs, lowcut, highcut):
     for i in range(signal_data.shape[1]):
-        signal_data[:, i] = bandpass_filter(signal=signal_data[:, i], lowcut=0.5, highcut=40, fs=fs)
+        signal_data[:, i] = bandpass_filter(signal=signal_data[:, i], lowcut=lowcut, highcut=highcut, fs=fs)
 
     # Apply Savitzky-Golay filter to each channel
     smoothed_signals = np.zeros_like(signal_data)
@@ -273,9 +273,9 @@ def save_features(channel_name, save_path , df):
     df.to_csv(csv_path, index=False)
 
 
-def extract_ecg_features(file_path, save_path):
+def extract_ecg_features(file_path, save_path, config):
         fs, signal = read_signal(file_path)
-        smoothed_signal = smoothing_singal(signal, fs)
+        smoothed_signal = smoothing_singal(signal, fs, config.ecg_low_cutoff, config.ecg_high_cutoff)
         for i in range(smoothed_signal.shape[1]):
             # Extract features and detect peaks
             channel_signal = smoothed_signal[:, i]

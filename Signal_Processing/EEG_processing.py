@@ -72,14 +72,14 @@ def moving_window(data, window_duration, time_step, sampling_freq):
 def save_features(channel_name, save_path, df):
             csv_path = os.path.join(save_path, f"{channel_name}.csv")
             df.to_csv(csv_path, index=False)
-
-def extract_eeg_features(file_path, save_path):
+            
+    
+def extract_eeg_features(file_path, save_path, config):
     #Load the EDF file
     raw = mne.io.read_raw_edf(file_path, preload=True)
     
     channel_names = raw.info['ch_names']
-    window_size = 60  # Window size in seconds
-    time_step = 30  # Step size in seconds
+        
     for channel_name in channel_names:
         if 'eeg' in channel_name.lower():
             channel = raw.copy().pick_channels([channel_name])
@@ -89,7 +89,7 @@ def extract_eeg_features(file_path, save_path):
             
             #Create a DataFrame for the channel data
             channel_df = pd.DataFrame({'time': times, 'amplitude': data[0]})
-            feature_df = moving_window(channel_df, window_size, time_step, sampling_freq)
+            feature_df = moving_window(channel_df, config.window_duration, config.time_step, sampling_freq)
             
             # Save the csv
             save_features(channel_name, save_path, feature_df)

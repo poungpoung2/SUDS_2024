@@ -8,10 +8,11 @@ from pathlib import Path
 
 class DataLoader:
     # Initialize the DataLoader with the data path and save path
-    def __init__(self, data_path, save_path):
+    def __init__(self, data_path, save_path, config):
         # Set the data path and save path
         self.data_path = data_path
         self.save_path = save_path
+        self.config = config
         
         
         # Supported file formats
@@ -55,7 +56,7 @@ class DataLoader:
         eeg_folder_path = Path(self.save_path) / "EEG"
         eeg_folder_path.mkdir(parents=True, exist_ok=True)
         
-        eeg.extract_eeg_features(file_path, eeg_folder_path)
+        eeg.extract_eeg_features(file_path, eeg_folder_path, self.config)
     
     # Load the ECG features from the file
     def load_ecg(self, file_path):
@@ -63,7 +64,7 @@ class DataLoader:
         ecg_folder_path = Path(self.save_path) / "ECG"
         ecg_folder_path.mkdir(parents=True, exist_ok=True)
         
-        ecg.extract_ecg_features(file_path, ecg_folder_path)
+        ecg.extract_ecg_features(file_path, ecg_folder_path, self.config)
     
     # Load the Audio features from the file
     def load_audio(self, file_path):
@@ -71,5 +72,5 @@ class DataLoader:
         audio_folder_path = Path(self.save_path) / "Audio"
         audio_folder_path.mkdir(parents=True, exist_ok=True)
         
-        audio.extract_audio_features(file_path, audio_folder_path)
+        audio.extract_audio_features(file_path, audio_folder_path, self.config)
 
