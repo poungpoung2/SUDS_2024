@@ -1,0 +1,3 @@
+[submodule "DSPipeline"]
+	path = DSPipeline
+	url = https://github.com/nczakaria/DSPipeline
