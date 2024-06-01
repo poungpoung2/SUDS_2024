@@ -8,7 +8,7 @@ def main():
     
     # Center the main window
     window_width = 600
-    window_height = 800
+    window_height = 900
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     position_top = int(screen_height / 2 - window_height/1.5)
