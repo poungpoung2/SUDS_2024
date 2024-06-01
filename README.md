@@ -56,6 +56,9 @@ The features extracted includes:
 ## Data 
 Unzip the Audio_data zip file to use collected data. The data consists of 1855 videos of 10-seconnd long snoring videos and 215 10-second long traffic videos. 
 
+https://drive.google.com/file/d/1F4Xd00HNIcBcZj_OByiXYHyqZQNFQ9vC/view?usp=sharing
+
+
 
 
 
